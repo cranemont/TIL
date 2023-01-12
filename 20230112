@@ -1,0 +1,28 @@
+# Database
+
+## Index
+
+- primary key와 unique field는 자동으로 btree index가 생성됨
+- 한 테이블에 여러 인덱스가 있어도 상관없음
+- AND절로 여러개 검색하는 쿼리가 많이 사용된다면 멀티컬럼 인덱스 고려하기
+- 멀티컬럼 인덱스의 경우 `=`으로 검색하는 경우가 많은 필드부터 순서 정하기
+  - [참고](https://stackoverflow.com/questions/48985975/for-a-composite-index-of-columns-of-different-cardinality-does-order-matter)
+  - 쿼리 날릴때 인덱스 지정 순서에 맞춰서 해야 성능이 나오기 때문. 이게 제일 중요.
+  - 만약 중간에 인덱스 순서가 틀어진 경우 순서가 맞는 인덱스까지만 사용함
+  - AND가 여러개인 경우 범위검색은 항상 맨 마지막에 할 것. range scan 이후의 인덱스는 사용되지 않음
+  - mysql에서는 멀티컬럼 인덱스를 AND조건으로 검색할 경우 가장 적은 row가 나오는 인덱스를 선택하고 나머지는 fileter를 걸음
+- 정수형 자료를 선택하는 것이 가장 효율적
+- 텍스트 검색의 경우 (Btree Index + LIKE) 조합보다 GIN Index걸고 full-text-searh하는게 나음(PostgreSQL)
+  - [참고](https://dev.to/____marcell/fast-fulltext-search-with-postgres-gin-index-22n5)
+- 인덱스 키의 크기는 되도록 작은 것이 좋음
+- integer필드를 인덱스로 설정한 경우 비교를 위해 Btree의 시간복잡도인 Log(N)이 걸리지만, M길이의 varchar의 경우 MLog(N)이 걸림. 모든 문자를 비교해야 하기 때문.
+- SELECT, JOIN할떄 자주 사용하는 값을 인덱스로 선택할 것
+- 카디널리티가 높은 값을 인덱스로 설정해야 한다(중복도가 낮은, unique에 가까운)
+- [인덱스가 너무 많아도 성능 떨어짐](https://stackoverflow.com/questions/4377525/using-more-than-one-index-per-table-is-dangerous)
+- [외래키에 인덱스 넣는것도 괜찮음](https://stackoverflow.com/questions/836167/does-a-foreign-key-automatically-create-an-index)
+  - https://sqlperformance.com/2012/11/t-sql-queries/benefits-indexing-foreign-keys
+  - https://www.brentozar.com/archive/2018/11/adventures-in-foreign-keys-how-should-i-index-these-things/
+
+## Data Types
+
+- [varchar과 text의 차이. 언제 어떻게 쓸지](https://stackoverflow.com/questions/2023481/mysql-large-varchar-vs-text)
